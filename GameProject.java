@@ -16,18 +16,20 @@ public class GameProject extends JFrame
 		 JFrame frame = new JFrame();
 		 frame.setSize(1120, 540);
 		 setDefaultCloseOperation(DISPOSE_ON_CLOSE);   // allows to close file
-		 setLocation(0, 0); // sets the location
+		 setLocation(100, 100); // sets the location
 		 
 		 frame.setResizable(false);
 		 Mandalorion pan = new Mandalorion();
+		 //Character Mand = new Character();
 		 //frame.setContentPane(pan);
+		 //JPanel pan = new JPanel(); 
 		 //JPanel pan = new JPanel(); 
 		 //frame.add(pan);
 		 frame.getContentPane().add(pan);
 		
 	
-		 pan.addComponentToPane(frame.getContentPane());
-
+		 //pan.addComponentToPane(pan.getContentPane());
+		 //Mand.addChar(frame.getContentPane());
 		
 		 frame.setVisible(true);
 		/*super ("Name");
@@ -48,7 +50,7 @@ public class GameProject extends JFrame
 	}
 	public static void main(String [] args) 
 	{
-		GameProject arj = new GameProject(); // Main calls the constructor that sets it's properties. 
+		GameProject arj = new GameProject(); // Main calls the constructor that sets the frame's properties. 
 	}
 	
 }
@@ -59,6 +61,8 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 {
 	/* These are all field variables */
 	JPanel cards, cards2; 
+	JPanel charPage; 
+    JPanel character;
 	JButton b1 = new JButton("Play");
 	JButton b2 = new JButton("Choose your Character");
 	JButton b3 = new JButton("Choose your Planet");
@@ -87,6 +91,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	int blastY = 340; 
 	
 	
+	boolean restart2 = false; 
 	int upTracker = 0;
 	int ge = (int)(Math.random()* 255); 
 	int r = (int)(Math.random()* 255); 
@@ -99,6 +104,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
     Timer score; 
     Timer forceLightning; 
 	Timer kaboom; 
+	Timer mover; 
     boolean shoot = false; 
     boolean hit = false; 
     boolean yodaExplode = false; 
@@ -119,6 +125,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	Image explode; 
 	long currentScore = 0;
 	boolean stop = false; 
+	boolean stop2 = false;
 	int coins = 500;
 	int lightCounter = 0; 
 	int lightY = 10; 
@@ -127,16 +134,25 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	boolean forceLightningClicked = false; 
 	boolean[] explosion = new boolean[6]; 
 	
+	int changeBag = 0;
+	String[] bagName = new String[4]; 
+	
 	
 	boolean[] dExplode = new boolean[5]; 
 	JButton pause;
 	
-	Image Arjun, battleDroid ;
+	Image battleDroid ;
 	Image showLightning;
 	JPanel imageAdd; 
-	
+	Image bagImg;
+	int dReturn = 0;
+	long speed = 0;
+	boolean crush = false; 
+	boolean crush2 = false; 
+	int crushCounter = 0; 
 	public Mandalorion() // Constructor initializes the coordinates for the driods and blasts. It also adds listeners and timers.
 	{
+		addComponentToPane();
 		if(ifGame == false)
 		{
 			stop = false; 
@@ -145,6 +161,10 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		{
 			stop = true; 
 		}
+		bagName[0] = "coruscant.jpeg";
+		bagName[1] = "c2.jpeg";
+		bagName[2] = "c3.jpeg";
+		bagName[3] = "c4.png";
 		dExplode[0] = false;  
 		dExplode[1] = false;
 		dExplode[2] = false;
@@ -186,8 +206,8 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		yodaDown down = new yodaDown();
 		timePass time = new timePass(); 
  
-		
-		
+		DroidCrush crusher = new DroidCrush(); 
+		//bagMover move = new bagMover();
 		
 		//setBackground(Color.BLUE); // Set Bag color 
 		addMouseListener(this); 
@@ -205,7 +225,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
        // blastDelay = new Timer(100, delay);
        // blastDelay.start();
         
-        yodaM = new Timer(1000, right);
+        yodaM = new Timer(100, right);
         yodaM.start();
         
         yodaD = new Timer(2000, down);
@@ -214,6 +234,11 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
         score = new Timer(10, time); 
         score.start();
         
+        Timer destroy = new Timer(100, crusher);
+        destroy.start();
+       // mover = new Timer(50, move); 
+       // move.start(); 
+        
        
         
 	}
@@ -221,9 +246,9 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	{
 		
 		super.paintComponent(g); 
-		//System.out.println(ifGame);
-		Arjun = new ImageIcon("mandalorian.jpeg").getImage();
-		Image gameBag = new ImageIcon("coruscant.jpeg").getImage();
+		//System.out.println(ifGame + " game");
+		bagImg = new ImageIcon("mandalorian.jpeg").getImage();
+		Image gameBag = new ImageIcon(bagName[changeBag]).getImage();
 		battleDroid = new ImageIcon("droid2.png").getImage();
 		Image Yoda = new ImageIcon("bYoda.png").getImage();
 		explode = new ImageIcon("explosion.gif").getImage();
@@ -232,14 +257,14 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		
 		if(ifHome)
 		{
-			g.drawImage(Arjun, 0, 0, 1120, 540, null); 
+           g.drawImage(bagImg, 0, 0,  null); 
 		}
 		if(ifGame)
 		{
-		
-		    barrX = yodaX - 100;
+			//g.drawImage(forceField, 0, 0, null);
+		    barrX = yodaX - 100;	
             barrY = yodaY + 60;
-			g.drawImage(gameBag, 0, 0, 1120, 540, null); 
+			g.drawImage(gameBag, 0, 0,  null); 
 			g.setColor(Color.black); 
 			g.fillRect(10, 440, 1120, 100);
 			
@@ -304,8 +329,8 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 			
 			
 			
-			Color col2 = new Color(r, ge, b);
-			g.setColor(col2);
+			g.setColor(Color.BLUE);
+			
 			if(dExplode[0] == false && blastCorr[0][0] > 10)
 			{
 				g.drawRect(blastCorr[0][0], blastCorr[0][1], 75, 2);
@@ -328,11 +353,67 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 				g.drawRect(blastCorr[4][0], blastCorr[4][1], 75, 2);
 			}
 		    
-		    if(dExplode[0] == true && dExplode[1] == true && dExplode[2] == true && dExplode[3] == true && dExplode[4] == true)
+		    if((dExplode[0] == true && dExplode[1] == true && dExplode[2] == true && dExplode[3] == true && dExplode[4] == true) || yodaX > 1024)
 		    {
-				stop = true; 
+				//restart2 = true; 
+				//stop = true; 
+				/*dExplode[0] = false;  
+				dExplode[1] = false;
+				dExplode[2] = false;
+				dExplode[3] = false;
+				dExplode[4] = false; 
+				blastCorr[0][0] = blastX; 
+				blastCorr[0][1] = blastY; 
+				
+				droidCorr[0][0] = droidX; 
+				droidCorr[0][1] = droidY; 
+				droidCorr[1][0] = 950; 
+				droidCorr[1][1] = 293; 
+				droidCorr[2][0] = 1050; 
+				droidCorr[2][1] = 293; 
+				droidCorr[3][0] = 1150; 
+				droidCorr[3][1] = 293; 
+				droidCorr[4][0] = 1250; 
+				droidCorr[4][1] = 293; 
+				
+				blastCorr[1][0] = droidCorr[1][0] - 140; 
+				blastCorr[1][1] = 340; 
+				blastCorr[2][0] = droidCorr[2][0] - 140; 
+				blastCorr[2][1] = 340; 
+				blastCorr[3][0] = droidCorr[3][0] - 140; 
+				blastCorr[3][1] = 340; 
+				blastCorr[4][0] = droidCorr[4][0] - 140; 
+				blastCorr[4][1] = 340; */
+				
+				dExplode[0] = false;  
+				dExplode[1] = false;
+				dExplode[2] = false;
+				dExplode[3] = false;
+				dExplode[4] = false; 
+				blastCorr[0][0] = 710; 
+				blastCorr[0][1] = 340; 
+				
+				droidCorr[0][0] = 1250;
+				droidCorr[0][1] = 293; 
+				droidCorr[1][0] = 1350; 
+				droidCorr[1][1] = 293; 
+				droidCorr[2][0] = 1450; 
+				droidCorr[2][1] = 293; 
+				droidCorr[3][0] = 1550; 
+				droidCorr[3][1] = 293; 
+				droidCorr[4][0] = 1650; 
+				droidCorr[4][1] = 293; 
+				
+				blastCorr[1][0] = droidCorr[1][0] - 140; 
+				blastCorr[1][1] = 340; 
+				blastCorr[2][0] = droidCorr[2][0] - 140; 
+				blastCorr[2][1] = 340; 
+				blastCorr[3][0] = droidCorr[3][0] - 140; 
+				blastCorr[3][1] = 340; 
+				blastCorr[4][0] = droidCorr[4][0] - 140; 
+				blastCorr[4][1] = 340; 
 			}
-		    
+		    System.out.println(crush + " " + crush2);
 			//System.out.println(currentScore);
             Font plainFont = new Font("Serif", Font.BOLD, 24);
             g.setFont(plainFont);
@@ -403,21 +484,38 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 			}
 			if(yodaExplode == true)
 			{
+				System.out.println(true);
 				explosion[5] = true;
 				if(explosion[5] == true)
 				g.drawImage(explode, yodaX, yodaY, -150, 200, null);
+				restart2 = true;
+				addComponentToPane();
 				stop = true; 
+				
 		
 			}
+			//g.setColor(Color.YELLOW);
+			//g.drawImage(forceField, yodaX + 200, yodaY - 100, -600, 400,null);
+			//g.drawRect(yodaX + 200, yodaY - 100, 600, 10);
 			//System.out.println("ddd" + (blastY - Y));
             //System.out.println(barrX + " " + barrY);
 			decideHit();
-			
+			if(yodaX > 1024)
+			{
+				yodaX = 100;
+				yodaY = 260;
+				changeBag++;
+				if(changeBag > 3)
+				{
+					changeBag = 0; 
+				}
+			}
 		  }
+		  //System.out.println(stop + "stop");
 			
 			
        }
-	public void drawExplode(Graphics g, int index)
+	public void drawExplode(Graphics g, int index) // Draws the explode gif after anything dies
 	{
 		//System.out.println(true);
 		explosion[index] = true;
@@ -544,6 +642,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		 //System.out.println(life + "life");
 		 if (life == 0) 
 		 {
+			 System.out.println(life + "lifeee");
 			 yodaExplode = true; 
 		
 		 }
@@ -558,72 +657,95 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	 
 	
 		
-	
-	public void addComponentToPane(Container pane) /* This 
+
+	public void addComponentToPane() /* This 
 	method sets the layout for the game. Play, choose character, pause/resume game, choosing force 
 	powers, and going back to the home page */
 	{
-		//Arjun = new ImageIcon("mandalorian.jpeg").getImage();
-		
-		String BUTTONPANEL = "1";
-		String TEXTPANEL = "2";
+		Character star = new Character();
 		cards = new JPanel(new CardLayout());
 		cards2 = new JPanel(new CardLayout());
-	    JPanel setSide = new JPanel(); 
-		JPanel homePage = new JPanel(); 
-		JPanel charPage = new JPanel();		
-		//JPanel imageAdd = new JPanel(); 
-		//JLabel bagImg = new JLabel(bag); 
-	
-		
-		//imageAdd.setLayout(new BorderLayout()); 
-		homePage.setLayout(new GridLayout(7 ,1));
-		homePage.add(b1);
-		homePage.add(b2);
-		homePage.add(b3);
-		homePage.add(b4);
-		homePage.add(b5);
-		homePage.add(b6);
-		//b1.setPreferredSize(new Dimension(100, 85)); 
-		
-		Color col = new Color(r, ge, b);
-	    System.out.println(r + " " + ge + " " + b);
-		b1.setBackground(col);
-		b1.setOpaque(true);
-		b2.setBackground(col);
-		b2.setOpaque(true);
-		b3.setBackground(col);
-		b3.setOpaque(true);
-		b4.setBackground(col);
-		b4.setOpaque(true);
-		b5.setBackground(col);
-		b5.setOpaque(true);
-		b6.setBackground(col);
-		b6.setOpaque(true);
-	
-		//homePage.setLocation(10, 10); 
-		JPanel character = new JPanel();	
-		setSide.add(homePage, BorderLayout.WEST); 
-	    //imageAdd.add(bagImg, BorderLayout.EAST); 
-		cards.add(setSide, "1");
-		
-		
-		pane.add(cards, BorderLayout.WEST);
-		if(ifHome == false)
-		pane.add(cards2, BorderLayout.WEST);
-		//if(ifHome == false) b1.setPreferredSize(new Dimension(0, 0)); 
-		b1.addActionListener(this);
-		b2.addActionListener(this);
-		b3.addActionListener(this);
-		b4.addActionListener(this);
-		b5.addActionListener(this);
-		b6.addActionListener(this);
+		//ImageIcon bag = new ImageIcon(getClass().getResource("mandalorian.jpeg"));
+		JPanel homeAdd = new JPanel(); 
+		//JButton bagImage = new JButton(bag); 
+		JPanel home = new JPanel();
+		JPanel play = new JPanel();
+		JPanel playAdd = new JPanel();
 		
 
-			
+	    //homeAdd.setLayout(new FlowLayout(1, 1, 1));
+		home.setLayout(new GridLayout(7 ,7));
+		//bagImage.setLayout(new FlowLayout(-5, -10, -10));
+		home.add(b1);
+		home.add(b2);
+		home.add(b3);
+		home.add(b4);
+		home.add(b5);
+		home.add(b6);
+		//homeAdd.setLayout(new BorderLayout()); 
+		
+		b1.setOpaque(false);
+		b1.setContentAreaFilled(false);
+		//b1.setBorderPainted(false);
+		
+		b2.setOpaque(false);
+		b2.setContentAreaFilled(false);
+		//b2.setBorderPainted(false);
+		
+		b3.setOpaque(false);
+		b3.setContentAreaFilled(false);
+		//b3.setBorderPainted(false);
+		
+		b4.setOpaque(false);
+		b4.setContentAreaFilled(false);
+		//b4.setBorderPainted(false);
+		
+		b5.setOpaque(false);
+		b5.setContentAreaFilled(false);
+		//b5.setBorderPainted(false);
+		
+		b6.setOpaque(false);
+		b6.setContentAreaFilled(false);
+		//b6.setBorderPainted(false);
+		//bagImage.add(b1);
+		//bagImage.add(b2);
+		//bagImage.add(b3);
+		//bagImage.add(b4);
+		//bagImage.add(b5);
+		//homeAdd.add(home, BorderLayout.WEST); 
+	
+		//bagImage.setPreferredSize(new Dimension(0 ,0));
+		
+		/*b1.setPreferredSize(new Dimension(w1, h1));
+		b2.setPreferredSize(new Dimension(w1, h1));
+		b3.setPreferredSize(new Dimension(w1, h1));
+		b4.setPreferredSize(new Dimension(w1, h1));
+		b5.setPreferredSize(new Dimension(w1, h1));
+		b6.setPreferredSize(new Dimension(w1, h1));*/
+		
+		/*b1.setLocation(100, 100);
+		b1.setLocation(100, 150);
+		b1.setLocation(100, 200);
+		b1.setLocation(100, 250);
+		b1.setLocation(100, 300);
+		b1.setLocation(100, 350);*/
+		//home.add(bagImage);
+		//cards.add(home); 
+		
+		//bagImage.setOpaque( false );
+		homeAdd.add(home); 
+		//homeAdd.add(home, BorderLayout.WEST);
+		cards.add(homeAdd, "1");
+		
+		
+		b1.addActionListener(this);
+        b2.addActionListener(this);
+        
+	    charPage = new JPanel(); 
+	    character = new JPanel();
 		ImageIcon babyYoda = new ImageIcon(getClass().getResource("gorgu.jpeg"));
 		gorgu = new JButton("", babyYoda);
-		gorgu.setPreferredSize( new Dimension(50, 50));
+		//gorgu.setPreferredSize( new Dimension(50, 50));
 			
 			
 		ImageIcon skywalker = new ImageIcon(getClass().getResource("luke.jpeg"));
@@ -643,7 +765,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 			
 		
 			
-		character.setLayout(new GridLayout(3,2));
+		//character.setLayout(new GridLayout(10, 1));
 		
 		character.add(gorgu); 
 		character.add(luke);
@@ -651,10 +773,10 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		character.add(bo);
 		character.add(ahsoka);
 		character.add(cara);
+		//charPage.setLayout(new BorderLayout());
 			
-			
-		int width = 100; 
-		int height = 100;
+	    int width = 50; 
+		int height = 50;
 		gorgu.setPreferredSize(new Dimension(width, height)); 
 		luke.setPreferredSize(new Dimension(width, height)); 
 		mando.setPreferredSize(new Dimension(width, height)); 
@@ -663,8 +785,13 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		cara.setPreferredSize(new Dimension(width, height)); 
 		
 		charPage.add(character);
-		cards.add(charPage, "2");
-		JPanel play = new JPanel();
+
+		//cards.add(star); 
+		cards.add(play, "play");
+		cards.add(charPage, "char");
+
+		//åhomeAdd.setBackground(new Color(255, 255, 255, 255));
+		
 		JPanel abilities = new JPanel();
 		JPanel playButtons = new JPanel(); 
 	    cards.add(abilities, "3"); 
@@ -674,24 +801,34 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		JButton returnHome = new JButton("Home");
 		returnHome.addActionListener(this);
 		
-		cards.add(play, "4");
+		
 		
 		play.add(playButtons, BorderLayout.WEST); 
 		JButton power = new JButton("Force Powers");
+		JButton restart = new JButton("Restart"); 
 		pause = new JButton("Pause Game");
 		pause.addActionListener(this); 
 		power.addActionListener(this);
 		playButtons.add(returnHome); 
+		
+		
+		
+			
+			
+			
 		playButtons.add(power); 
 		playButtons.add(pause);
+
+	
 		JPanel powerButtons = new JPanel();
+		JButton Quit = new JButton("Quit");
 		powerButtons.setLayout(new GridLayout(7, 1)); 
 		abilities.setLayout(new BorderLayout()); 
 		abilities.add(powerButtons);
 		JButton Lightning2 = new JButton("Force Lightning 500 coins"); 
 		JButton ForceDeflect = new JButton("Force deflect 100 coins"); 
 		JButton Speed = new JButton("Force Speed 100 coins"); 
-		JButton ForceCrush = new JButton("Force Push 100 coins"); 
+		JButton ForceCrush = new JButton("Force Crush 100 coins"); 
 		JButton Choke = new JButton("Force Choke  300 coins "); 
 		JButton Shield = new JButton("Force Shield 500 coins"); 
 		
@@ -700,16 +837,37 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		powerButtons.add(Speed); 
 		powerButtons.add(ForceCrush); 
 		powerButtons.add(Choke); 
-		powerButtons.add(Shield); 
+		powerButtons.add(Shield);
+		playButtons.add(Quit); 
+		//playButtons.add(restart); 
 
  
 		Lightning2.addActionListener(this);
+		restart.addActionListener(this);
+		Quit.addActionListener(this);
+		ForceCrush.addActionListener(this);
+		add(cards);
+		//repaint();
 		
 		
-	 
 	}
 	
 	
+	
+class Character
+{
+	public void addChar(Container pane)
+	{
+
+		
+		
+		
+
+	}
+		
+		
+		
+}
 	
 	public void mousePressed(MouseEvent e) {} // If mouse is pressed - Not doing anything at the moment 
 	
@@ -722,7 +880,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	public void mouseExited(MouseEvent e) {} // If the mouse exits the panel - Not doing anything at the moment 
 	
 	
-	public void mouseDragged(MouseEvent e) {} // If you are draggin anything Not doing anything at the moment 
+	public void mouseDragged(MouseEvent e) {} // If you are draggin anything -  Not doing anything at the moment 
 	
 	
 	public void mouseMoved(MouseEvent e) {} // Checks if mouse is moving -  Not doing anything at the moment 
@@ -736,12 +894,13 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 
 		if(e.getKeyCode() == KeyEvent.VK_RIGHT)
 		{
-			System.out.println(true);
+			System.out.println(true + "Ddd");
 			ifRight = true; 
 		}
 		
 		if(e.getKeyCode() == KeyEvent.VK_UP)
 		{
+			System.out.println(true + "asa");
 			ifUp = true; 
 		}
 		
@@ -763,7 +922,12 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 			
 			 
 		 }
-		 
+		 if(ch == 'c')
+		 {
+			 crush2 = true; 
+			 System.out.println(true+ "hi");
+		 }
+			 
 			 
 		
 		
@@ -780,10 +944,12 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		CardLayout cl = (CardLayout)(cards.getLayout());
 		//CardLayout c2 = (CardLayout)(cards2.getLayout());
 		
+		
 		  if (evt.getActionCommand().equals("Choose your Character"))
 		  {
-			 cl.show(cards, "2"); 
-			// System.out.println(true + " eee");
+			 cl.show(cards, "char"); 
+			 System.out.println(true + " Chracter page");
+			 ifGame = false;
 			 ifHome = false;
 			 repaint();
 			 //System.out.println(ifHome + "ddd");
@@ -791,8 +957,8 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		  
 		  if (evt.getActionCommand().equals("Play"))
 		  {
-			 cl.show(cards, "4");
-			 System.out.println(true + " eee");
+			 cl.show(cards, "play");
+			 System.out.println(true + "ddd");
 			 ifHome = false;
 			 ifGame = true; 
 			 repaint();
@@ -810,11 +976,11 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		     repaint();
 		  }
 		  
-		  if (evt.getActionCommand().equals("Force Powers"))
+		  if (evt.getActionCommand().equals("Force Powers") && stop == false)
 		  {
 			 //System.out.println("hi");
 		     cl.show(cards, "3");
-			 stop = true; 
+			 stop2 = !(stop2); 
 			 ifHome = false;
 		     ifGame = false; 
 		     repaint();
@@ -824,36 +990,98 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		  if (evt.getActionCommand().equals("Force Lightning 500 coins"))
 		     {
 				 //System.out.println("hi");
-				 cl.show(cards, "4");
-				 stop = false; 
+				 cl.show(cards, "play");
+				 stop2 = !(stop2); 
 				 ifHome = false;
 				 ifGame = true; 
 				 coins = coins - 500; 
 				 forceLightningClicked = true; 
 				 repaint();
 		     }
-		  if(evt.getActionCommand().equals("Pause Game"))
+		  if(evt.getActionCommand().equals("Pause Game") && stop == false)
 		   {
 				 System.out.println("hi");
-				 cl.show(cards, "4");
+				 cl.show(cards, "play");
 		
 				 ifHome = false;
 				 ifGame = true; 
 				 pause.setText("Resume");
-				 stop = !(stop); 
+				 stop2 = !(stop2); 
 				 repaint();
 		    }
 		  if(evt.getActionCommand().equals("Resume"))
 		  {
 				 System.out.println("hi");
-				 cl.show(cards, "4");
+				 cl.show(cards, "play");
 				 pause.setText("Pause Game");
 				 ifHome = false;
 				 ifGame = true; 
-				 stop = !(stop);  
+				 stop2 = !(stop2);  
 				 repaint();
 		   }
+		       
+		  /*if(evt.getActionCommand().equals("Restart"))
+		   {
+			     //restart2 = false;
+				 System.out.println("hi0000");
+				// cl.show(cards, "play");
+				 yodaExplode = false;
+				 ifHome = false;
+				 ifGame = true; 
+				 //pause.setText("Resume");
+				 //stop = !(stop); \dExplode[0] = false;  
+				 dExplode[1] = false;
+				 dExplode[2] = false;
+				 dExplode[3] = false;
+				 dExplode[4] = false; 
+				 blastCorr[0][0] = blastX; 
+				 blastCorr[0][1] = blastY; 
+				
+				 droidCorr[0][0] = droidX; 
+				 droidCorr[0][1] = droidY; 
+				 droidCorr[1][0] = 950; 
+				 droidCorr[1][1] = 293; 
+				 droidCorr[2][0] = 1050; 
+				 droidCorr[2][1] = 293; 
+				 droidCorr[3][0] = 1150; 
+				 droidCorr[3][1] = 293; 
+				 droidCorr[4][0] = 1250; 
+				 droidCorr[4][1] = 293; 
+				 
+				 blastCorr[1][0] = droidCorr[1][0] - 140; 
+				 blastCorr[1][1] = 340; 
+				 blastCorr[2][0] = droidCorr[2][0] - 140; 
+				 blastCorr[2][1] = 340; 
+				 blastCorr[3][0] = droidCorr[3][0] - 140; 
+				 blastCorr[3][1] = 340; 
+				 blastCorr[4][0] = droidCorr[4][0] - 140; 
+				 blastCorr[4][1] = 340; 
+				 explosion[5] = false;
+				
+				 
+				 stop = false; 
+				 //repaint();
+		    }*/
+		    if(evt.getActionCommand().equals("Quit"))
+		    {
+				System.exit(0); 
+			}
+			if(evt.getActionCommand().equals("Force Crush 100 coins"))
+		    {
+				System.out.println("luke");
+				crush = true;
+				cl.show(cards, "play");
+				ifGame = true;
+				ifHome = false; 
+				stop2 = !(stop2); 
+				
+				coins = coins - 500; 
+				
+				repaint();
+			}
 			  
+			  
+			
 		
 	}
 	
@@ -861,13 +1089,13 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	{
 		public void actionPerformed(ActionEvent e) // Moves the droid 
 		{
-			if(!(stop) && !(ifHome))
+			if(!(stop) && !(ifHome) && !(stop2))
 			{
-				droidCorr[0][0] -= 4;  
-				droidCorr[1][0] -= 4;  
-				droidCorr[2][0] -= 4;  
-				droidCorr[3][0] -= 4;  
-				droidCorr[4][0] -= 4;  
+				droidCorr[0][0] -= 1;  
+				droidCorr[1][0] -= 1;  
+				droidCorr[2][0] -= 1;  
+				droidCorr[3][0] -= 1;  
+				droidCorr[4][0] -= 1;  
 			
 				repaint();
 			}
@@ -882,10 +1110,10 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		public void actionPerformed(ActionEvent e) 
 		/* While this method also moves the droids by calling changeLoc(), it also calls reshoot() if baby yoda has been hit */
 		{
-			if(!(stop))
+			if(!(stop) && !(stop2) && ifGame && !(ifHome))
 			{
-				if(!(ifHome))
-				{
+			
+			
 					changeLoc(); 
 					if(blastCorr[0][0] < 0 && dExplode[0] == false)
 					{
@@ -962,7 +1190,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 						
 					}
 				}
-			}
+			
 			repaint();
 			
 			
@@ -971,88 +1199,98 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		public void changeLoc() // Constantly moves the blasts unless the they come in contact with babyYoda
 		
 		{
-			
-			int speed = 20;
-			if(dExplode[0] == false)
-			blastCorr[0][0] -= speed;
-			
-			if(dExplode[1] == false)
-			blastCorr[1][0] -= speed;
-			
-			if(dExplode[2] == false)
-			blastCorr[2][0] -= speed;
-			
-			
-			if(dExplode[3] == false)
-			blastCorr[3][0] -= speed;
-			
-			
-			if(dExplode[4] == false)
-			blastCorr[4][0] -= speed;
-			
-			if(dExplode[0] == true)
+			if(ifGame && !(stop) && !(stop2))
 			{
-				while(blastCorr[0][0] > -100)
+				if(speed < 100)
 				{
-					blastCorr[0][0] -= speed;
-				
-						
-					
+					speed = currentScore/50;
 				}
-			}
-			
-			if(dExplode[1] == true)
-			{
-				blastCorr[1][0] = -100;
-				while(blastCorr[1][0] > -100)
+				else 
 				{
-					blastCorr[1][0] -= speed;
-				
-						
-					
+					speed = 100;
 				}
-			}
-			
-			if(dExplode[2] == true)
-			{
-			   blastCorr[2][0] = -100;
-			   while(blastCorr[2][0] > -100)
+					
+				if(dExplode[0] == false)
+				blastCorr[0][0] -= speed;
+				
+				if(dExplode[1] == false)
+				blastCorr[1][0] -= speed;
+				
+				if(dExplode[2] == false)
+				blastCorr[2][0] -= speed;
+				
+				
+				if(dExplode[3] == false)
+				blastCorr[3][0] -= speed;
+				
+				
+				if(dExplode[4] == false)
+				blastCorr[4][0] -= speed;
+				
+				if(dExplode[0] == true)
 				{
-					blastCorr[2][0] -= speed;
-				
-						
+					while(blastCorr[0][0] > -100)
+					{
+						blastCorr[0][0] -= speed;
 					
+							
+						
+					}
 				}
-			}
-			
-			
-			if(dExplode[3] == true)
-			{
-				blastCorr[3][0] = -100;
-				while(blastCorr[3][0] > -100)
+				
+				if(dExplode[1] == true)
 				{
-					blastCorr[3][0] -= speed;
-				
-						
+					blastCorr[1][0] = -100;
+					while(blastCorr[1][0] > -100)
+					{
+						blastCorr[1][0] -= speed;
 					
+							
+						
+					}
 				}
-			}
-			
-			
-			if(dExplode[4] == true)
-			{
-				blastCorr[4][0] = -100;
-				while(blastCorr[4][0] > -100)
+				
+				if(dExplode[2] == true)
 				{
-					blastCorr[4][0] -= speed;
-				
-						
+				   blastCorr[2][0] = -100;
+				   while(blastCorr[2][0] > -100)
+					{
+						blastCorr[2][0] -= speed;
 					
+							
+						
+					}
 				}
+				
+				
+				if(dExplode[3] == true)
+				{
+					blastCorr[3][0] = -100;
+					while(blastCorr[3][0] > -100)
+					{
+						blastCorr[3][0] -= speed;
+					
+							
+						
+					}
+				}
+				
+				
+				if(dExplode[4] == true)
+				{
+					blastCorr[4][0] = -100;
+					while(blastCorr[4][0] > -100)
+					{
+						blastCorr[4][0] -= speed;
+					
+							
+						
+					}
+				}
+				
+				
+				repaint();
 			}
-			
-			
-		    repaint();
 			
 		}
 	    public void reshoot() // Called when a blast hits baby yoda. 
@@ -1086,17 +1324,16 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		/* If the right key or up is key pressed, this methid moves Yoda 
 		 up or down. */
 		{
-			if(!(stop))
+			if(!(stop) && !(stop2))
 		    {
 				
-				if(ifRight == true)
-				{
+				
 					//System.out.println(1);
-					
-					yodaX += 7; 
-					ifRight = false; 
-					repaint();
-				}
+				if(ifGame == true)
+				yodaX += 7; 
+				ifRight = false; 
+				repaint();
+			
 				if(ifUp == true)
 				{
 					//System.out.println(1);
@@ -1128,7 +1365,7 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 		 back towards the ground when he jumps up and also 
 		 translates him forward */
 		 {
-			if(!stop)
+			if(!stop && !(stop2))
 			{
 				if(ifUp == false && upTracker > 0)
 				{
@@ -1157,11 +1394,29 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	{
 		public void actionPerformed(ActionEvent e) // This listener updates the score 
 		{
-			if(!stop)
+			if(ifGame && !(stop))
 			currentScore += 1; 
 			
 		}
 		
+	}
+	
+	class DroidCrush implements ActionListener 
+	{
+		public void actionPerformed(ActionEvent e)
+		{
+			//System.out.println(crush +  "  " + crush2);
+			if(crush && crush2)
+			{
+				droidCorr[crushCounter][1] -= 400;
+				crushCounter++;
+				if(droidCorr[crushCounter][1] <= 193)
+				dExplode[crushCounter] = true; 
+			}
+			
+			//crushCounter++; 
+
+		}
 	}
 
 }
@@ -1171,3 +1426,6 @@ class Mandalorion extends JPanel implements MouseListener, KeyListener, MouseMot
 	
 
 		
+
+
+
